@@ -1,0 +1,7 @@
+path: "/media/minh/Ubuntu Data/DL for CV/Exercises/traffic_monitoring/dataset"
+train: train/images
+val: val/images
+test: test/images
+nc: 1
+names: 
+  0: car
