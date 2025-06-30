@@ -9,16 +9,16 @@ class CarRegionTracking:
         self.vid_src = vid_src
         self.save_path = save_path
 
-        #track id in each regions stored in previous and current frame
-        self.prev_status = {}
-        self.cur_status = {} 
+       
+        self.hist_status = {}   #all track ids used to be in a region from the 1st frame to current - 1 frame
+        self.cur_status = {}    #all track ids in each region in the current frame
 
         #Store the number of cars that entered and exited each region
         self.in_counts = {}
         self.out_counts = {}
 
         for region_name in self.regions.keys():
-            self.prev_status[region_name] = set()
+            self.hist_status[region_name] = set()
             self.cur_status[region_name] = set()
             self.in_counts[region_name] = 0
             self.out_counts[region_name] = 0
@@ -86,12 +86,11 @@ class CarRegionTracking:
     def compareRegions(self):
         for region_name in self.regions.keys():
             for track_id in self.cur_status[region_name]:
-                if track_id not in self.prev_status[region_name]:
+                if track_id not in self.hist_status[region_name]:
                     self.in_counts[region_name] += 1
-            
-            for track_id in self.prev_status[region_name]:
-                if track_id not in self.cur_status[region_name]:
-                    self.out_counts[region_name] += 1
+                
+                self.out_counts[region_name] = len(self.hist_status[region_name] - self.cur_status[region_name])
+
 
 
     def process(self):
@@ -142,8 +141,8 @@ class CarRegionTracking:
                 in_count = self.in_counts[region_name]
                 out_count = self.out_counts[region_name]
                 cv2.putText(frame, f"{region_name}: In {in_count}, Out {out_count}", 
-                            (10, 30 + 30 * list(self.regions.keys()).index(region_name)), 
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, self.region_colors[i], 2)
+                            (10, 40 + 40 * list(self.regions.keys()).index(region_name)), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.0, self.region_colors[i], 3)
             
             # Write the frame to output video
             out.write(frame)
@@ -153,9 +152,11 @@ class CarRegionTracking:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
             
-            # Update previous status
-            # Deep copy the sets
-            self.prev_status = {region: tracks.copy() for region, tracks in self.cur_status.items()}
+            # Update status
+            for region_name in self.hist_status.keys():
+                for track_id in self.cur_status[region_name]:
+                    if track_id not in self.hist_status[region_name]:
+                        self.hist_status[region_name].add(track_id)
             self.cur_status = {region_name: set() for region_name in self.regions.keys()}
             
         video.release()
