@@ -28,7 +28,7 @@ pip install ultralytics opencv-python numpy
 
 ```
 traffic_monitoring/
-├── tmp.py                          # Main tracking implementation
+├── main.py                          # Main tracking implementation
 ├── input_vid.mov                   # Input drone video
 ├── traffic_monitoring_output.mp4   # Output processed video
 ├── runs/detect/train2/weights/     # Trained YOLO model weights
@@ -42,7 +42,7 @@ traffic_monitoring/
 ### Basic Usage
 
 ```python
-from tmp import CarRegionTracking
+from main import CarRegionTracking
 
 # Define regions of interest (polygon coordinates)
 regions = {
@@ -66,7 +66,7 @@ tracker.process()
 ### Running the Script
 
 ```bash
-python tmp.py
+python main.py
 ```
 
 ## Configuration
